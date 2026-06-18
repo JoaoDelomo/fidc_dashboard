@@ -1,0 +1,344 @@
+[
+  {
+    "parametros": {
+      "carteira": "FIDC LARCA AURORA",
+      "cnpj": "63.168.433/0001-70",
+      "data_posicao": "04/05/2026",
+      "tipo_carteira": "FIDC",
+      "isin": "nan",
+      "codigo_anbima": "S0001302574",
+      "status_cota": "Liberada",
+      "administrador": "VERT DISTRIBUIDORA DE TITULOS E VALORES MOBILIARIOS LTDA",
+      "gestor": "VERT GESTORA DE RECURSOS FINANCEIROS LTDA",
+      "pl_posicao": 13379076.84,
+      "pl_contabil": 0.0,
+      "patrimonio_total": 270401998.28,
+      "qtde_cota": 18079.11332472,
+      "ingressos": 0.0,
+      "retiradas": 0.0,
+      "valor_cota_liquida": 740.02948041,
+      "valor_cota_bruta": 740.02948041
+    },
+    "cotas_fundos": [],
+    "direitos_creditorios": [
+      {
+        "papel": "A VENCER",
+        "valor_nominal": 1.0,
+        "valor_presente": 262724131.82,
+        "pct_pl": 97.16
+      },
+      {
+        "papel": "MTM",
+        "valor_nominal": 1.0,
+        "valor_presente": -4971171.41,
+        "pct_pl": -1.83
+      },
+      {
+        "papel": "VALID",
+        "valor_nominal": 1.0,
+        "valor_presente": 88584.13,
+        "pct_pl": 0.03
+      },
+      {
+        "papel": "VENCIDO",
+        "valor_nominal": 1.0,
+        "valor_presente": 72075.71,
+        "pct_pl": 0.02
+      }
+    ],
+    "direitos_creditorios_total": {
+      "valor_presente": 257913620.25,
+      "pct_pl": 95.38
+    },
+    "pdd": [
+      {
+        "papel": "PDD",
+        "valor_total": -1465088.69,
+        "pct_pl": -0.54
+      }
+    ],
+    "swap": [
+      {
+        "mnemonico": "25K00087363",
+        "camara": "CETIP",
+        "data_operacao": "03/11/2025",
+        "data_vencimento": "21/11/2033",
+        "valor_base": 34567733.0,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 38336338.05,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 38047182.96,
+        "valor_total": 289155.09,
+        "pct_pl": 0.1
+      },
+      {
+        "mnemonico": "25K02627145",
+        "camara": "CETIP",
+        "data_operacao": "14/11/2025",
+        "data_vencimento": "19/12/2033",
+        "valor_base": 31344160.01,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 35556887.61,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 35132600.58,
+        "valor_total": 424287.03,
+        "pct_pl": 0.15
+      },
+      {
+        "mnemonico": "25K03669010",
+        "camara": "CETIP",
+        "data_operacao": "28/11/2025",
+        "data_vencimento": "19/12/2033",
+        "valor_base": 21312875.93,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 24161972.52,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 23787178.85,
+        "valor_total": 374793.67,
+        "pct_pl": 0.13
+      },
+      {
+        "mnemonico": "25L02908489",
+        "camara": "CETIP",
+        "data_operacao": "15/12/2025",
+        "data_vencimento": "18/01/2034",
+        "valor_base": 36389499.3,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 41601290.0,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 41101273.21,
+        "valor_total": 500016.79,
+        "pct_pl": 0.18
+      },
+      {
+        "mnemonico": "25L04377806",
+        "camara": "CETIP",
+        "data_operacao": "30/12/2025",
+        "data_vencimento": "18/01/2034",
+        "valor_base": 24941748.4,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 28313515.1,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 28124414.81,
+        "valor_total": 189100.29,
+        "pct_pl": 0.06
+      },
+      {
+        "mnemonico": "26A05085109",
+        "camara": "CETIP",
+        "data_operacao": "30/01/2026",
+        "data_vencimento": "17/02/2034",
+        "valor_base": 53046894.0,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 61346122.12,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 60388673.47,
+        "valor_total": 957448.65,
+        "pct_pl": 0.35
+      },
+      {
+        "mnemonico": "26B03794246",
+        "camara": "CETIP",
+        "data_operacao": "19/02/2026",
+        "data_vencimento": "17/03/2034",
+        "valor_base": 18663926.96,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 21870470.54,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 21627568.62,
+        "valor_total": 242901.92,
+        "pct_pl": 0.08
+      },
+      {
+        "mnemonico": "26B05131767",
+        "camara": "CETIP",
+        "data_operacao": "27/02/2026",
+        "data_vencimento": "17/03/2034",
+        "valor_base": 21394550.28,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 25009882.2,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 24544611.44,
+        "valor_total": 465270.76,
+        "pct_pl": 0.17
+      },
+      {
+        "mnemonico": "26C03912440",
+        "camara": "CETIP",
+        "data_operacao": "17/03/2026",
+        "data_vencimento": "20/04/2034",
+        "valor_base": 18704688.31,
+        "ponta_ativa": "DI COM PERCENTUAL",
+        "valor_ponta_ativa": 21935113.12,
+        "ponta_passiva": "PRE",
+        "valor_ponta_passiva": 21913628.27,
+        "valor_total": 21484.85,
+        "pct_pl": 0.0
+      }
+    ],
+    "valores_a_pagar": [
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA COM TAXA DE ADMINISTRAÇÃO",
+        "liquidacao": "08/05/2026",
+        "valor_total": -1706.92
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA COM TAXA DE ADMINISTRAÇÃO",
+        "liquidacao": "08/05/2026",
+        "valor_total": -23961.17
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA COM TAXA DE GESTÃO",
+        "liquidacao": "08/05/2026",
+        "valor_total": -1434.87
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA COM TAXA DE GESTÃO",
+        "liquidacao": "08/05/2026",
+        "valor_total": -23961.17
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA DE TAXA CETIP",
+        "liquidacao": "08/05/2026",
+        "valor_total": -4459.75
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA DE TAXA CETIP",
+        "liquidacao": "08/05/2026",
+        "valor_total": -13379.11
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA DE TAXA SELIC",
+        "liquidacao": "08/05/2026",
+        "valor_total": -24.78
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA DE TAXA SELIC",
+        "liquidacao": "31/12/2026",
+        "valor_total": -7.44
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA DE TAXA SELIC",
+        "liquidacao": "31/12/2026",
+        "valor_total": -33.05
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "ESTORNO DE VALORES A IDENTIFICAR",
+        "liquidacao": "31/12/2026",
+        "valor_total": -24721.99
+      },
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "TAXA SELIC",
+        "liquidacao": "08/05/2026",
+        "valor_total": -8.25
+      },
+      {
+        "segmento": "TAXAS PATRIMONIAIS",
+        "historico": "TAXA DE ADMINISTRAÇÃO",
+        "liquidacao": "08/05/2026",
+        "valor_total": -8593.11
+      },
+      {
+        "segmento": "TAXAS PATRIMONIAIS",
+        "historico": "TAXA DE ADMINISTRAÇÃO",
+        "liquidacao": "08/06/2026",
+        "valor_total": -1722.62
+      },
+      {
+        "segmento": "TAXAS PATRIMONIAIS",
+        "historico": "TAXA DE GESTÃO",
+        "liquidacao": "08/05/2026",
+        "valor_total": -8502.04
+      },
+      {
+        "segmento": "TAXAS PATRIMONIAIS",
+        "historico": "TAXA DE GESTÃO",
+        "liquidacao": "08/06/2026",
+        "valor_total": -1704.37
+      }
+    ],
+    "total_a_pagar": -114220.64,
+    "valores_a_receber": [
+      {
+        "segmento": "DESPESA RECEITA",
+        "historico": "DESPESA ANBIMA",
+        "liquidacao": "29/05/2026",
+        "valor_total": 869.12
+      }
+    ],
+    "total_a_receber": 869.12,
+    "cotas_superiores": [
+      {
+        "ordem": "97",
+        "mnemonico": "SNR_A01_FIDC LARCA AURORA",
+        "detalhes": "Script: COTA_PERCENTUAL_CDI; Percentual: 100; Spread: 2",
+        "qtde": 199872.65559223,
+        "valor_cota": 1080.937269,
+        "valor_total": 216049802.48,
+        "pct_pl": 79.89
+      },
+      {
+        "ordem": "98",
+        "mnemonico": "MZA_B01_FIDC LARCA AURORA",
+        "detalhes": "Script: COTA_PERCENTUAL_CDI; Percentual: 100; Spread: 7.33",
+        "qtde": 17370.00000275,
+        "valor_cota": 1108.37206449,
+        "valor_total": 19252422.76,
+        "pct_pl": 7.11
+      },
+      {
+        "ordem": "99",
+        "mnemonico": "MZA_A01_FIDC LARCA AURORA",
+        "detalhes": "Script: COTA_PERCENTUAL_CDI; Percentual: 100; Spread: 3.6",
+        "qtde": 19941.00000453,
+        "valor_cota": 1089.24809156,
+        "valor_total": 21720696.2,
+        "pct_pl": 8.03
+      }
+    ],
+    "caixa": [
+      {
+        "saldo": "C/C",
+        "valor_total": 407.9,
+        "pct_pl": 0.0
+      },
+      {
+        "saldo": "C/C - 1542 / 237 - 3396 - 7143-9",
+        "valor_total": 76754.56,
+        "pct_pl": 0.02
+      },
+      {
+        "saldo": "C/C - 1561 / 237 - 3396 - 7146-3",
+        "valor_total": 1876508.64,
+        "pct_pl": 0.69
+      },
+      {
+        "saldo": "C/C - 1652 / 341 - 0910 - 98666-0",
+        "valor_total": 1238.7,
+        "pct_pl": 0.0
+      }
+    ],
+    "caixa_total": 1954909.7999999998,
+    "rentabilidade": {
+      "diaria": 0.6216,
+      "mtd": 0.6216,
+      "ytd": -7.4597,
+      "d30": -5.2659,
+      "d90": -9.8592,
+      "d180": -19.009,
+      "d360": null,
+      "d720": null
+    }
+  }
+]
