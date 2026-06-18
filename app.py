@@ -168,18 +168,6 @@ if len(historico) > 1:
         st.plotly_chart(fig2, use_container_width=True)
 
     with tab3:
-        comp_labels, comp_values = [], []
-        dc_total = snap.get("direitos_creditorios_total", {})
-        if dc_total.get("pct_pl"): comp_labels.append("Direitos Creditórios"); comp_values.append(abs(dc_total["pct_pl"]))
-        cf_total = sum(c["pct_pl"] for c in snap.get("cotas_fundos", []))
-        if cf_total: comp_labels.append("Cotas RF"); comp_values.append(abs(cf_total))
-        swap_total = sum(s["pct_pl"] for s in snap.get("swap", []))
-        if swap_total: comp_labels.append("Swap"); comp_values.append(abs(swap_total))
-        caixa_pct = snap["caixa_total"] / p["pl_posicao"] * 100 if p["pl_posicao"] else 0
-        if caixa_pct: comp_labels.append("Caixa"); comp_values.append(abs(caixa_pct))
-        pdd_total = sum(abs(r["pct_pl"]) for r in snap.get("pdd", []))
-        if pdd_total: comp_labels.append("PDD"); comp_values.append(pdd_total)
-
         datas_comp = [h["parametros"]["data_posicao"] for h in historico]
         comp_hist = []
         for h in historico:
@@ -198,6 +186,35 @@ if len(historico) > 1:
         st.plotly_chart(fig3, use_container_width=True)
 
 # ── Composição atual ───────────────────────────────────────────────────────────
+# Monta comp_labels/values fora do bloco histórico para garantir disponibilidade com 1 período
+comp_labels = []
+comp_values = []
+
+dc_total = snap.get("direitos_creditorios_total", {})
+if dc_total.get("pct_pl"):
+    comp_labels.append("Direitos Creditórios")
+    comp_values.append(abs(dc_total["pct_pl"]))
+
+cf_total_pct = sum(c["pct_pl"] for c in snap.get("cotas_fundos", []))
+if cf_total_pct:
+    comp_labels.append("Cotas RF")
+    comp_values.append(abs(cf_total_pct))
+
+swap_total_pct = sum(s["pct_pl"] for s in snap.get("swap", []))
+if swap_total_pct:
+    comp_labels.append("Swap")
+    comp_values.append(abs(swap_total_pct))
+
+caixa_pct = snap["caixa_total"] / p["pl_posicao"] * 100 if p["pl_posicao"] else 0
+if caixa_pct:
+    comp_labels.append("Caixa")
+    comp_values.append(abs(caixa_pct))
+
+pdd_total_pct = sum(abs(r["pct_pl"]) for r in snap.get("pdd", []))
+if pdd_total_pct:
+    comp_labels.append("PDD")
+    comp_values.append(pdd_total_pct)
+
 st.markdown('<div class="section-title">Composição da carteira — posição atual</div>', unsafe_allow_html=True)
 
 col_a, col_b = st.columns([1, 1])

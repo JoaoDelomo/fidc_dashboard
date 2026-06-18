@@ -45,3 +45,11 @@ fidc_dashboard/
 - Detalhamento de Direitos Creditórios e PDD
 - Tabela de Swaps com resultado líquido
 - Obrigações a pagar e a receber
+
+## Metas 18/06 x 19/06
+
+- Melhorar nomes/descrições.
+- Colocar valores de cotas sênior, mezanino e sub.
+- razão de subordinação precisa ser calculado.
+- preciso ver as informações no tempo, tal qual ver diário.
+- SWAP precisa abrir Mnemônico (escondido), além de colocar mais informações sobre DI COM PERCENTUAL, buscar no regulamento ou falar com alguém que sabe.
