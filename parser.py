@@ -215,48 +215,46 @@ def _to_float_str(val) -> float | None:
 
 
 def _parse_data(s: str) -> datetime:
-    """Converte DD/MM/YYYY para datetime — usado para ordenação correta."""
     try:
         return datetime.strptime(s, "%d/%m/%Y")
     except:
         return datetime.min
 
 
+# 🛠️ FUNÇÃO ATUALIZADA: Agora usa o leitor seguro para carregar dados existentes
 def save_snapshot(data: dict, storage_path: str = "data/historico.json"):
     os.makedirs(os.path.dirname(storage_path), exist_ok=True)
-    historico = []
-    if os.path.exists(storage_path):
-        with open(storage_path, "r") as f:
-            historico = json.load(f)
+    
+    # Usa a função blindada para ler o arquivo existente sem estourar erro
+    historico = load_historico(storage_path)
 
     data_posicao = data["parametros"]["data_posicao"]
-    # Evita duplicatas pela data
     historico = [h for h in historico if h["parametros"]["data_posicao"] != data_posicao]
     historico.append(data)
-    # Ordena por data real (DD/MM/YYYY), não alfabeticamente
     historico.sort(key=lambda x: _parse_data(x["parametros"]["data_posicao"]))
 
-    with open(storage_path, "w") as f:
+    # Força o salvamento em UTF-8 limpo
+    with open(storage_path, "w", encoding="utf-8") as f:
         json.dump(historico, f, ensure_ascii=False, indent=2)
 
     return historico
 
 
+# 🛠️ FUNÇÃO ATUALIZADA: Try-Except posicionado corretamente protegendo o escopo inteiro
 def load_historico(storage_path: str = "data/historico.json") -> list:
     if not os.path.exists(storage_path):
         return []
         
-    # 🛡️ Tentativa 1: Tenta ler em UTF-8 (padrão)
+    # 🛡️ Tentativa 1: UTF-8 completo
     try:
         with open(storage_path, "r", encoding='utf-8') as f:
             return json.load(f)
-    except UnicodeDecodeError:
-        # 🛡️ Tentativa 2: Se falhar, o Windows salvou em formato antigo. Latin-1 resolve!
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        # 🛡️ Tentativa 2: Fallback para arquivos gerados no Windows antigo
         try:
             with open(storage_path, "r", encoding='latin-1') as f:
                 return json.load(f)
         except:
             return []
     except:
-        # Evita que o app caia caso o arquivo esteja corrompido ou vazio
         return []
