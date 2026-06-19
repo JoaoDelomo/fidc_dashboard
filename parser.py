@@ -37,7 +37,7 @@ def parse_lamina(filepath: str) -> dict:
     df_cotas = df_cotas.dropna(how="all")
     df_cotas = df_cotas[df_cotas["Cód. Papel"].notna()]
     df_cotas = df_cotas[~df_cotas["Cód. Papel"].astype(str).str.startswith("Total")]
-    df_cotas = df_cotas[~df_cotas["Cód. Papel"].astype(str).str.isupper().apply(lambda x: x and len(df_cotas)>0)]
+    df_cotas = df_cotas[df_cotas["%PL"].notna()]
     cotas_list = []
     for _, row in df_cotas.iterrows():
         cotas_list.append({
@@ -175,7 +175,6 @@ def parse_lamina(filepath: str) -> dict:
     rent = {}
     if not df_rent.empty:
         row = df_rent.iloc[0]
-        cols = df_rent.columns.tolist()
         rent = {
             "diaria": _to_float_str(row.get("Diária")),
             "mtd": _to_float_str(row.get("Mensal (MTD)")),
@@ -195,14 +194,11 @@ def _to_float(val) -> float:
     if val is None or (isinstance(val, float) and pd.isna(val)):
         return 0.0
     try:
-        # Se já é numérico (int/float), retorna direto
         if isinstance(val, (int, float)):
             return float(val)
         s = str(val).strip()
-        # Notação científica do Excel (ex: 2.6272413182E8)
         if "E" in s.upper() and not s.startswith("R"):
             return float(s)
-        # Formato brasileiro: 1.234.567,89
         s = s.replace(".", "").replace(",", ".")
         return float(s)
     except:
@@ -218,6 +214,14 @@ def _to_float_str(val) -> float | None:
         return None
 
 
+def _parse_data(s: str) -> datetime:
+    """Converte DD/MM/YYYY para datetime — usado para ordenação correta."""
+    try:
+        return datetime.strptime(s, "%d/%m/%Y")
+    except:
+        return datetime.min
+
+
 def save_snapshot(data: dict, storage_path: str = "data/historico.json"):
     os.makedirs(os.path.dirname(storage_path), exist_ok=True)
     historico = []
@@ -229,7 +233,8 @@ def save_snapshot(data: dict, storage_path: str = "data/historico.json"):
     # Evita duplicatas pela data
     historico = [h for h in historico if h["parametros"]["data_posicao"] != data_posicao]
     historico.append(data)
-    historico.sort(key=lambda x: x["parametros"]["data_posicao"])
+    # Ordena por data real (DD/MM/YYYY), não alfabeticamente
+    historico.sort(key=lambda x: _parse_data(x["parametros"]["data_posicao"]))
 
     with open(storage_path, "w") as f:
         json.dump(historico, f, ensure_ascii=False, indent=2)
