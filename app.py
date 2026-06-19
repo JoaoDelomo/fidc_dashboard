@@ -5,6 +5,7 @@ import json
 import os
 import sys
 from datetime import datetime
+import time
 
 sys.path.insert(0, os.path.dirname(__file__))
 from parser import parse_lamina, save_snapshot, load_historico
@@ -17,19 +18,15 @@ st.markdown("""
 .metric-card { 
     background: #f8f9fa;
     border-radius: 10px;
-    padding: 12px 14px;             /* 🛠️ Reduzido o padding para dar mais espaço interno */
-    margin-bottom: 8px;
+    padding: 12px 14px;             
     
-    /* 🛠️ AJUSTE DE ALTURA: Aumentado de 115px para 135px */
     height: 135px;                 
     display: flex;
     flex-direction: column;
     justify-content: space-between; 
 }
-/* 🛠️ Reduzido de 12px para 11px para economizar espaço */
 .metric-label { font-size:11px;color:#6c757d;text-transform:uppercase;letter-spacing:.04em; }
 
-/* 🛠️ FONTE AJUSTADA: Reduzido de 22px para 19px para o 'R$' e o número caberem juntos */
 .metric-value { font-size:19px;font-weight:600;color:#212529;margin-top:2px; }
 
 .metric-sub   { font-size:11px;color:#6c757d;margin-top:2px; }
@@ -59,7 +56,12 @@ with st.sidebar:
             historico = save_snapshot(data, HISTORICO_PATH)
             st.success(f"✅ Importado: {data['parametros']['data_posicao']}")
         except Exception as e: st.error(f"Erro: {e}")
-        finally: os.unlink(tmp_path)
+        finally:
+            time.sleep(0.3)
+            try:
+                os.unlink(tmp_path)
+            except:
+                pass
 
     historico = load_historico(HISTORICO_PATH)
     if not historico: st.info("Faça upload de uma lâmina para começar."); st.stop()
@@ -156,13 +158,17 @@ for col, label, chave in zip(cols_r, periodos, chaves):
 # Evolução histórica
 if len(historico) > 1:
     st.markdown('<div class="section-title">Evolução histórica</div>', unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["📈 Sub & PL Posição","📊 Rentabilidade (%)","🏗️ Composição da carteira"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Sub & PL Posição","📊 Rentabilidade (%)","🏗️ Composição da carteira","📉 DC Vencido & PDD","📊 MTM"])
     hist_sorted = sorted(historico, key=lambda h: parse_data(h["parametros"]["data_posicao"]))
 
     with tab1:
         datas_dt = [parse_data(h["parametros"]["data_posicao"]) for h in hist_sorted]
         cotas_h  = [h["parametros"]["valor_cota_liquida"] for h in hist_sorted]
         pl_h     = [h["parametros"]["pl_posicao"] for h in hist_sorted]
+
+        dias_uteis_ausentes = [str(d.date()) for d in pd.bdate_range(datas_dt[0], datas_dt[-1]) if d not in datas_dt]
+        rangebreaks_padrao  = [dict(bounds=["sat","mon"]), dict(values=dias_uteis_ausentes)]
+
         tooltips = []
         for h in hist_sorted:
             hp = h["parametros"]; hr = h.get("rentabilidade",{})
@@ -177,9 +183,9 @@ if len(historico) > 1:
         fig.add_trace(go.Bar(x=datas_dt,y=pl_h,name="PL",
             marker_color="rgba(30,158,117,0.25)",yaxis="y2",
             hovertemplate="PL: R$ %{y:,.2f}<extra></extra>"))
-        fig.update_layout(xaxis=dict(type="date",tickformat="%d/%m/%Y",tickangle=-30),
-            yaxis=dict(title="Cota (R$)",side="left"),
-            yaxis2=dict(title="PL (R$)",side="right",overlaying="y",showgrid=False),
+        fig.update_layout(xaxis=dict(type="date",tickformat="%d/%m/%Y",tickangle=-30,rangebreaks=rangebreaks_padrao),
+            yaxis=dict(title="PU Sub(R$)",side="left"),
+            yaxis2=dict(title="PL Pos(R$)",side="right",overlaying="y",showgrid=False),
             legend=dict(orientation="h",y=1.05),margin=dict(l=0,r=0,t=30,b=0),
             height=360,hovermode="x unified")
         st.plotly_chart(fig, use_container_width=True)
@@ -196,7 +202,7 @@ if len(historico) > 1:
         fig2.add_trace(go.Bar(x=df_rh["Data_dt"],y=df_rh[pc],marker_color=cores,name=pc,
             hovertemplate="<b>%{x|%d/%m/%Y}</b><br>"+pc+": %{y:+.4f}%<extra></extra>"))
         fig2.add_hline(y=0,line_dash="dash",line_color="#adb5bd",line_width=1)
-        fig2.update_layout(xaxis=dict(type="date",tickformat="%d/%m/%Y",tickangle=-30),
+        fig2.update_layout(xaxis=dict(type="date",tickformat="%d/%m/%Y",tickangle=-30,rangebreaks=rangebreaks_padrao),
             yaxis_title=f"Rentabilidade % ({pc})",margin=dict(l=0,r=0,t=20,b=0),height=300)
         st.plotly_chart(fig2, use_container_width=True)
 
@@ -213,10 +219,74 @@ if len(historico) > 1:
         for cn, cor in {"DC":"#185FA5","Cotas RF":"#1D9E75","Caixa":"#888780"}.items():
             fig3.add_trace(go.Bar(x=df_comp["Data_dt"],y=df_comp[cn],name=cn,marker_color=cor,
                 hovertemplate="<b>%{x|%d/%m/%Y}</b><br>"+cn+": %{y:.2f}% PL<extra></extra>"))
-        fig3.update_layout(barmode="stack",xaxis=dict(type="date",tickformat="%d/%m/%Y",tickangle=-30),
+        fig3.update_layout(barmode="stack",xaxis=dict(type="date",tickformat="%d/%m/%Y",tickangle=-30,rangebreaks=rangebreaks_padrao),
             yaxis_title="% PL",legend=dict(orientation="h",y=1.05),
             margin=dict(l=0,r=0,t=30,b=0),height=300)
         st.plotly_chart(fig3, use_container_width=True)
+    with tab4:
+        dc_vencido_h = []
+        pdd_h        = []
+        datas_tab4   = []
+        for h in hist_sorted:
+            datas_tab4.append(parse_data(h["parametros"]["data_posicao"]))
+            vencido = next((r["valor_presente"] for r in h.get("direitos_creditorios",[])
+                            if r["papel"] == "VENCIDO"), 0)
+            dc_vencido_h.append(abs(vencido))
+            pdd_h.append(abs(sum(r["valor_total"] for r in h.get("pdd",[]))))
+
+        fig4 = go.Figure()
+        fig4.add_trace(go.Scatter(
+            x=datas_tab4, y=dc_vencido_h,
+            name="DC Vencido",
+            line=dict(color="#E24B4A", width=2),
+            mode="lines+markers", marker=dict(size=6),
+            yaxis="y1",
+            hovertemplate="<b>%{x|%d/%m/%Y}</b><br>DC Vencido: R$ %{y:,.2f}<extra></extra>",
+        ))
+        fig4.add_trace(go.Scatter(
+            x=datas_tab4, y=pdd_h,
+            name="PDD",
+            line=dict(color="#BA7517", width=2, dash="dot"),
+            mode="lines+markers", marker=dict(size=6),
+            yaxis="y1",
+            hovertemplate="<b>%{x|%d/%m/%Y}</b><br>PDD: R$ %{y:,.2f}<extra></extra>",
+        ))
+        fig4.update_layout(
+            xaxis=dict(type="date", tickformat="%d/%m/%Y", tickangle=-30, rangebreaks=rangebreaks_padrao),
+            yaxis=dict(title="R$", side="left"),
+            legend=dict(orientation="h", y=1.05),
+            margin=dict(l=0, r=0, t=30, b=0),
+            height=360,
+            hovermode="x unified",
+        )
+        st.plotly_chart(fig4, use_container_width=True)
+    with tab5:
+        dc_mtm_h   = []
+        datas_tab5 = []
+        for h in hist_sorted:
+            datas_tab5.append(parse_data(h["parametros"]["data_posicao"]))
+            mtm = next((r["valor_presente"] for r in h.get("direitos_creditorios",[])
+                        if r["papel"] == "MTM"), 0)
+            dc_mtm_h.append(mtm)
+
+        fig5 = go.Figure()
+        fig5.add_trace(go.Scatter(
+            x=datas_tab5, y=dc_mtm_h,
+            name="MTM",
+            line=dict(color="#BA7517", width=2),
+            mode="lines+markers", marker=dict(size=6),
+            hovertemplate="<b>%{x|%d/%m/%Y}</b><br>MTM: R$ %{y:,.2f}<extra></extra>",
+        ))
+        fig5.add_hline(y=0, line_dash="dash", line_color="#adb5bd", line_width=1)
+        fig5.update_layout(
+            xaxis=dict(type="date", tickformat="%d/%m/%Y", tickangle=-30, rangebreaks=rangebreaks_padrao),
+            yaxis=dict(title="R$", side="left"),
+            legend=dict(orientation="h", y=1.05),
+            margin=dict(l=0, r=0, t=30, b=0),
+            height=360,
+            hovermode="x unified",
+        )
+        st.plotly_chart(fig5, use_container_width=True)
 
 # ── Composição atual ───────────────────────────────────────────────────────────
 comp_data = []
@@ -466,27 +536,14 @@ st.markdown("<hr style='margin:4px 0 2px; border-top: 1px double #dee2e6; border
 st.markdown("<hr style='margin:4px 0 2px; border-top: 1px double #dee2e6; border-width:3px;'>", unsafe_allow_html=True)
 # Direitos Creditórios
 st.markdown('<div class="section-title">Direitos creditórios</div>', unsafe_allow_html=True)
-col_dc1, col_dc2 = st.columns(2)
-with col_dc1:
-    dc_rows = snap.get("direitos_creditorios",[])
-    if dc_rows:
+dc_rows = snap.get("direitos_creditorios",[])
+if dc_rows:
+    col_vazio1, col_tabela, col_vazio2 = st.columns([1, 2, 1])
+    with col_tabela:
         st.dataframe(pd.DataFrame([{"Situação":r["papel"],
             "Valor Presente":fmt_brl(r["valor_presente"]) if r["valor_presente"] else "—",
             "% PL":f"{r['pct_pl']:.2f}%" if r["pct_pl"] else "—"} for r in dc_rows]),
-            use_container_width=True,hide_index=True)
-with col_dc2:
-    dc_vals = [(r["papel"],r["valor_presente"]) for r in snap.get("direitos_creditorios",[])
-               if r["valor_presente"] and r["valor_presente"]>0]
-    pdd_val = abs(sum(r["valor_total"] for r in snap.get("pdd",[])))
-    if dc_vals:
-        fig_dc = go.Figure(go.Bar(x=[d[0] for d in dc_vals],y=[d[1] for d in dc_vals],
-            marker_color=["#185FA5","#E24B4A","#888780","#BA7517"][:len(dc_vals)],
-            text=[fmt_brl(d[1]) for d in dc_vals],textposition="outside"))
-        if pdd_val:
-            fig_dc.add_hline(y=-pdd_val,line_dash="dash",line_color="#E24B4A",
-                annotation_text=f"PDD: {fmt_brl(pdd_val)}",annotation_position="bottom right")
-        fig_dc.update_layout(yaxis_title="R$",margin=dict(l=0,r=0,t=10,b=0),height=260,showlegend=False)
-        st.plotly_chart(fig_dc, use_container_width=True)
+            use_container_width=True, hide_index=True)
 
 # Swap
 st.markdown('<div class="section-title">Derivativos — swap</div>', unsafe_allow_html=True)
