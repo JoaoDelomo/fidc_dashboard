@@ -53,3 +53,12 @@ fidc_dashboard/
 - razão de subordinação precisa ser calculado.
 - preciso ver as informações no tempo, tal qual ver diário.
 - SWAP precisa abrir Mnemônico (escondido), além de colocar mais informações sobre DI COM PERCENTUAL, buscar no regulamento ou falar com alguém que sabe.
+
+PL POSIÇÃO - COTA SUB
+VALOR COTA SUB / PREÇO
+QTE SUB
+RF
+G COTAS BAR
+SPREAD CDI +
+EVOLUÇÃO PDD NA EVOLUÇÃO HISTÓRICA
+MTM CIREITOS CREDITÓRIOS

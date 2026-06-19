@@ -11,12 +11,28 @@ from parser import parse_lamina, save_snapshot, load_historico
 
 st.set_page_config(page_title="FIDC Dashboard", page_icon="📊", layout="wide", initial_sidebar_state="expanded")
 
+# ── CSS dos KPIs corrigido para evitar quebras e vazamentos ──────────────────
 st.markdown("""
 <style>
-.metric-card { background:#f8f9fa;border-radius:10px;padding:16px 20px;margin-bottom:8px; }
-.metric-label { font-size:12px;color:#6c757d;text-transform:uppercase;letter-spacing:.04em; }
-.metric-value { font-size:22px;font-weight:600;color:#212529;margin-top:4px; }
-.metric-sub   { font-size:12px;color:#6c757d;margin-top:2px; }
+.metric-card { 
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 12px 14px;             /* 🛠️ Reduzido o padding para dar mais espaço interno */
+    margin-bottom: 8px;
+    
+    /* 🛠️ AJUSTE DE ALTURA: Aumentado de 115px para 135px */
+    height: 135px;                 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+}
+/* 🛠️ Reduzido de 12px para 11px para economizar espaço */
+.metric-label { font-size:11px;color:#6c757d;text-transform:uppercase;letter-spacing:.04em; }
+
+/* 🛠️ FONTE AJUSTADA: Reduzido de 22px para 19px para o 'R$' e o número caberem juntos */
+.metric-value { font-size:19px;font-weight:600;color:#212529;margin-top:2px; }
+
+.metric-sub   { font-size:11px;color:#6c757d;margin-top:2px; }
 .pos { color:#2d6a2d; } .neg { color:#a32d2d; }
 .section-title { font-size:13px;font-weight:600;color:#495057;text-transform:uppercase;
                  letter-spacing:.05em;margin:1.5rem 0 .75rem;
@@ -89,11 +105,27 @@ def kpi(col, label, value, sub=""):
     <div class="metric-value">{value}</div>
     {"<div class='metric-sub'>" + sub + "</div>" if sub else ""}</div>""", unsafe_allow_html=True)
 
-# Header
-col_h1, col_h2 = st.columns([3, 1])
+# ── Header ───────────────────────────────────────────────────────────────────
+# 🛠️ AJUSTE 1: Aumentamos o espaço da coluna do Logo (de 0.3 para 1) e ajustamos as outras
+col_logo, col_h1, col_h2 = st.columns([1, 2.5, 1])
+
+with col_logo:
+    # 📁 IMPORTANTE: Seu arquivo deve chamar rigorosamente 'logo.png'
+    caminho_logo = os.path.join(os.path.dirname(__file__), "logo.png")
+    
+    if os.path.exists(caminho_logo):
+        # 🛠️ AJUSTE 2: Aumentamos a largura da imagem de 65 para 130 (O dobro do tamanho!)
+        # Você pode testar números maiores como 150 ou 180 se ainda estiver pequeno.
+        st.image(caminho_logo, width=800)
+    else:
+        # Se você ainda não colou o arquivo lá, ele mostra esse emoji para o código não quebrar
+        st.markdown("<h2 style='margin:0; font-size:40px;'>🏢</h2>", unsafe_allow_html=True)
+
 with col_h1:
-    st.markdown(f"## {p['carteira']}")
+    # Usando o st.header com anchor=False para sumir com aquele link fantasma lá de cima!
+    st.header(p['carteira'], anchor=False)
     st.caption(f"CNPJ {p['cnpj']} · {p['administrador']} · {p['gestor']}")
+
 with col_h2:
     st.markdown(f"**Data-posição:** {p['data_posicao']}")
     st.markdown(f"**Status:** {'🟢' if p['status_cota'] == 'Liberada' else '🟡'} {p['status_cota']}")
@@ -102,7 +134,7 @@ st.markdown("---")
 # KPIs
 k1,k2,k3,k4,k5 = st.columns(5)
 kpi(k1,"PL Posição",fmt_brl(p["pl_posicao"]),f"Patrimônio total: {fmt_brl(p['patrimonio_total'])}")
-kpi(k2,"Cota Líquida",f"R$ {p['valor_cota_liquida']:,.6f}".replace(",","X").replace(".",",").replace("X","."),
+kpi(k2,"Preço Cota Sub",f"R$ {p['valor_cota_liquida']:,.6f}".replace(",","X").replace(".",",").replace("X","."),
     f"Bruta: R$ {p['valor_cota_bruta']:,.6f}".replace(",","X").replace(".",",").replace("X","."))
 kpi(k3,"Qtd. Cotas",f"{p['qtde_cota']:,.2f}".replace(",","X").replace(".",",").replace("X","."))
 kpi(k4,"Ingressos",fmt_brl(p["ingressos"]),f"Retiradas: {fmt_brl(p['retiradas'])}")
@@ -124,7 +156,7 @@ for col, label, chave in zip(cols_r, periodos, chaves):
 # Evolução histórica
 if len(historico) > 1:
     st.markdown('<div class="section-title">Evolução histórica</div>', unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["📈 Cota & PL","📊 Rentabilidade","🏗️ Composição da carteira"])
+    tab1, tab2, tab3 = st.tabs(["📈 Sub & PL Posição","📊 Rentabilidade (%)","🏗️ Composição da carteira"])
     hist_sorted = sorted(historico, key=lambda h: parse_data(h["parametros"]["data_posicao"]))
 
     with tab1:
@@ -139,7 +171,7 @@ if len(historico) > 1:
                 f"YTD: {fmt_pct(hr.get('ytd'))}<br>Ingressos: {fmt_brl(hp['ingressos'])}<br>"
                 f"Retiradas: {fmt_brl(hp['retiradas'])}")
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=datas_dt,y=cotas_h,name="Cota líquida",
+        fig.add_trace(go.Scatter(x=datas_dt,y=cotas_h,name="Cota Sub",
             line=dict(color="#185FA5",width=2),mode="lines+markers",marker=dict(size=6),
             yaxis="y1",hovertemplate="%{customdata}<extra></extra>",customdata=tooltips))
         fig.add_trace(go.Bar(x=datas_dt,y=pl_h,name="PL",
@@ -173,7 +205,7 @@ if len(historico) > 1:
         for h in hist_sorted:
             dc = h.get("direitos_creditorios_total",{}).get("pct_pl",0) or 0
             cf = sum(c["pct_pl"] for c in h.get("cotas_fundos",[])) or 0
-            cx = h["caixa_total"]/h["parametros"]["pl_posicao"]*100 if h["parametros"]["pl_posicao"] else 0
+            cx = h["caixa_total"]/h["parametros"]["patrimonio_total"]*100 if h["parametros"]["patrimonio_total"] else 0
             comp_hist.append({"Data_dt":parse_data(h["parametros"]["data_posicao"]),
                 "DC":abs(dc),"Cotas RF":abs(cf),"Caixa":abs(cx)})
         df_comp = pd.DataFrame(comp_hist)
@@ -186,38 +218,92 @@ if len(historico) > 1:
             margin=dict(l=0,r=0,t=30,b=0),height=300)
         st.plotly_chart(fig3, use_container_width=True)
 
-# Composição atual
-comp_labels,comp_values = [],[]
-dc_total = snap.get("direitos_creditorios_total",{})
-if dc_total.get("pct_pl"): comp_labels.append("Direitos Creditórios"); comp_values.append(abs(dc_total["pct_pl"]))
-cf_pct = sum(c["pct_pl"] for c in snap.get("cotas_fundos",[]))
-if cf_pct: comp_labels.append("Cotas RF"); comp_values.append(abs(cf_pct))
-sw_pct = sum(s["pct_pl"] for s in snap.get("swap",[]))
-if sw_pct: comp_labels.append("Swap"); comp_values.append(abs(sw_pct))
-cx_pct = snap["caixa_total"]/p["pl_posicao"]*100 if p["pl_posicao"] else 0
-if cx_pct: comp_labels.append("Caixa"); comp_values.append(abs(cx_pct))
-pdd_pct = sum(abs(r["pct_pl"]) for r in snap.get("pdd",[]))
-if pdd_pct: comp_labels.append("PDD"); comp_values.append(pdd_pct)
+# ── Composição atual ───────────────────────────────────────────────────────────
+comp_data = []
 
-cotas_sup = snap.get("cotas_superiores",[])
+# 1. Direitos Creditórios
+dc_total = snap.get("direitos_creditorios_total", {})
+if dc_total.get("pct_pl"):
+    comp_data.append({
+        "label": "Direitos Creditórios",
+        "pct": abs(dc_total["pct_pl"]),
+        "valor": dc_total.get("valor_presente", 0)
+    })
+
+# 2. Cotas RF
+cf_pct = sum(c["pct_pl"] for c in snap.get("cotas_fundos", []))
+if cf_pct:
+    comp_data.append({
+        "label": "Cotas RF",
+        "pct": abs(cf_pct),
+        "valor": sum(c["valor_total"] for c in snap.get("cotas_fundos", []))
+    })
+
+# 3. Swap
+sw_pct = sum(s["pct_pl"] for s in snap.get("swap", []))
+if sw_pct:
+    comp_data.append({
+        "label": "Swap",
+        "pct": abs(sw_pct),
+        "valor": sum(s["valor_total"] for s in snap.get("swap", []))
+    })
+
+# 4. Caixa
+cx_pct = snap["caixa_total"] / p["patrimonio_total"] * 100 if p["patrimonio_total"] else 0
+if cx_pct:
+    comp_data.append({
+        "label": "Caixa",
+        "pct": abs(cx_pct),
+        "valor": snap.get("caixa_total", 0)
+    })
+
+# 5. PDD
+pdd_pct = sum(abs(r["pct_pl"]) for r in snap.get("pdd", []))
+if pdd_pct:
+    comp_data.append({
+        "label": "PDD",
+        "pct": pdd_pct,
+        "valor": sum(abs(r["valor_total"]) for r in snap.get("pdd", []))
+    })
+
+# Separa as listas para o gráfico de pizza da Carteira
+comp_labels = [d["label"] for d in comp_data]
+comp_values = [d["pct"] for d in comp_data]
+comp_valores_formatados = [fmt_brl(d["valor"]) for d in comp_data]
+
+# ── SEUS CÁLCULOS PRESERVADOS (Para a col_b não quebrar) ──────────────────────
+cotas_sup = snap.get("cotas_superiores", [])
 total_sup = sum(c["valor_total"] for c in cotas_sup)
 valor_sub = p["patrimonio_total"] - total_sup
-pct_sub   = valor_sub/p["patrimonio_total"]*100 if p["patrimonio_total"] else 0
+pct_sub   = valor_sub / p["patrimonio_total"] * 100 if p["patrimonio_total"] else 0
 
 st.markdown('<div class="section-title">Composição da carteira — posição atual</div>', unsafe_allow_html=True)
 col_a, col_b = st.columns([1,1])
 
 with col_a:
-    fig_d = go.Figure(go.Pie(labels=comp_labels,values=comp_values,hole=0.55,
-        marker_colors=["#185FA5","#1D9E75","#BA7517","#888780","#E24B4A"],
-        textinfo="label+percent",hovertemplate="%{label}: %{value:.2f}% PL<extra></extra>"))
-    fig_d.update_layout(margin=dict(l=0,r=0,t=20,b=0),height=300,showlegend=False,
-        annotations=[dict(text="Carteira",x=0.5,y=0.5,font_size=13,showarrow=False)])
+    fig_d = go.Figure(go.Pie(
+        labels=comp_labels,
+        values=comp_values,
+        hole=0.55,
+        marker_colors=["#185FA5", "#1D9E75", "#BA7517", "#888780", "#E24B4A"],
+        textinfo="label+percent",
+        customdata=comp_valores_formatados,
+        hovertemplate="<b>%{label}</b><br>%{value:.2f}% PL<br>Valor: %{customdata}<extra></extra>",
+    ))
+    
+    # Margens expandidas para o texto "Swap" e "PDD" não sumirem no topo
+    fig_d.update_layout(
+        margin=dict(l=50, r=50, t=60, b=10),
+        height=340,
+        showlegend=False,
+        annotations=[dict(text="Carteira", x=0.5, y=0.5, font_size=13, showarrow=False)]
+    )
     st.plotly_chart(fig_d, use_container_width=True)
 
 with col_b:
     cores_map = {"Sênior":"#185FA5","Mezanino A":"#1D9E75","Mezanino B":"#2DC4A0","Subordinada":"#BA7517"}
     pizza_labels,pizza_values,pizza_tooltip,pizza_cores = [],[],[],[]
+    
     for c in cotas_sup:
         tipo = tipo_cota(c["mnemonico"]); spr = spread_cota(c["detalhes"])
         pizza_labels.append(tipo); pizza_values.append(c["valor_total"])
@@ -225,17 +311,25 @@ with col_b:
             f"% Patrim.: {c['pct_pl']:.2f}%<br>Spread: {spr}%<br>"
             f"Valor cota: {fmt_brl(c['valor_cota'])}<br>Qtd: {c['qtde']:,.2f}")
         pizza_cores.append(cores_map.get(tipo,"#888780"))
+        
     if valor_sub > 0:
         pizza_labels.append("Subordinada"); pizza_values.append(valor_sub)
         pizza_tooltip.append(f"<b>Subordinada</b><br>Valor: {fmt_brl(valor_sub)}<br>"
             f"% Patrim.: {pct_sub:.2f}%<br>Valor cota: {fmt_brl(p['valor_cota_liquida'])}<br>"
             f"Qtd: {p['qtde_cota']:,.2f}<br>Spread: —")
         pizza_cores.append(cores_map["Subordinada"])
-    fig_c = go.Figure(go.Pie(labels=pizza_labels,values=pizza_values,hole=0.5,
-        marker_colors=pizza_cores,textinfo="label+percent",
-        customdata=pizza_tooltip,hovertemplate="%{customdata}<extra></extra>"))
-    fig_c.update_layout(margin=dict(l=0,r=0,t=20,b=0),height=300,showlegend=False,
-        annotations=[dict(text="Cotas",x=0.5,y=0.5,font_size=13,showarrow=False)])
+        
+    fig_c = go.Figure(go.Pie(labels=pizza_labels, values=pizza_values, hole=0.5,
+        marker_colors=pizza_cores, textinfo="label+percent",
+        customdata=pizza_tooltip, hovertemplate="%{customdata}<extra></extra>"))
+    
+    # 🛠️ AJUSTE DE ALINHAMENTO: Deixando idêntico ao gráfico da esquerda
+    fig_c.update_layout(
+        margin=dict(l=50, r=50, t=60, b=10), # 60 no topo empurra o gráfico para baixo igual o outro
+        height=340,                          # 340 de altura pareia o tamanho das caixas
+        showlegend=False,
+        annotations=[dict(text="Cotas", x=0.5, y=0.5, font_size=13, showarrow=False)]
+    )
     st.plotly_chart(fig_c, use_container_width=True)
 
 # Tabela de cotas com comparação
@@ -269,30 +363,107 @@ if valor_sub > 0:
         "pct_pl_ant":ant_sub["pct_pl"] if ant_sub else None,
         "valor_cota_ant":ant_sub["valor_cota"] if ant_sub else None})
 
-data_ant_label = p_ant["data_posicao"] if p_ant else "—"
-st.markdown(f'<div class="section-title">Estrutura de cotas — comparação com {data_ant_label}</div>', unsafe_allow_html=True)
 
-hdr_cols = st.columns([2,1,2.5,1.5,2.5,2])
-for col, txt in zip(hdr_cols, ["Classe","Spread","Valor Total","% Patrim.","Valor Cota","Qtd Cotas"]):
-    col.markdown(f'<span style="font-size:11px;color:#6c757d;text-transform:uppercase;letter-spacing:.04em">{txt}</span>', unsafe_allow_html=True)
-st.markdown("<hr style='margin:4px 0 8px;border-color:#dee2e6'>", unsafe_allow_html=True)
+
+# ── 1. FUNÇÕES AUXILIARES DE COMPARAÇÃO (Garantindo que existam) ──────────────
+def seta(a, b):
+    if b is None: return ""
+    return "▲" if a > b else "▼" if a < b else "—"
+
+def cor_seta(a, b):
+    if b is None: return "#6c757d"
+    return "#2d6a2d" if a > b else "#a32d2d" if a < b else "#6c757d"
 
 def cel_md(atual, anterior, formatter):
     if anterior is None: return formatter(atual)
-    cor = cor_seta(atual, anterior); arrow = seta(atual, anterior)
+    cor = cor_seta(atual, anterior)
+    arrow = seta(atual, anterior)
     return f'<span style="color:{cor};font-weight:600">{formatter(atual)} {arrow}</span>'
 
+# ── 2. CÁLCULO DO SPREAD MÉDIO PONDERADO (POSIÇÃO ATUAL) ────────────────────
+numerador_spread = 0.0
+denominador_spread = 0.0
+
+for c in snap.get("cotas_superiores", []):
+    try:
+        spr_num = float(spread_cota(c["detalhes"]).replace(",", ".").replace("%", "").strip()) / 100
+        peso = c["pct_pl"] / 100
+        numerador_spread += (spr_num * peso)
+        denominador_spread += peso
+    except:
+        pass
+
+spread_medio_ponderado = (numerador_spread / denominador_spread * 100) if denominador_spread > 0 else 0.0
+
+# ── 3. CÁLCULO DO SPREAD MÉDIO PONDERADO (POSIÇÃO ANTERIOR) ────────────────
+spread_medio_ponderado_ant = None
+denominador_spread_ant = None
+total_sup_ant = None
+
+if snap_ant:
+    numerador_spread_ant = 0.0
+    denominador_spread_ant = 0.0
+    for c in snap_ant.get("cotas_superiores", []):
+        try:
+            spr_num = float(spread_cota(c["detalhes"]).replace(",", ".").replace("%", "").strip()) / 100
+            peso = c["pct_pl"] / 100
+            numerador_spread_ant += (spr_num * peso)
+            denominador_spread_ant += peso
+        except:
+            pass
+            
+    if denominador_spread_ant > 0:
+        spread_medio_ponderado_ant = (numerador_spread_ant / denominador_spread_ant * 100)
+    
+    total_sup_ant = sum(c["valor_total"] for c in snap_ant.get("cotas_superiores", []))
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Título da Seção
+data_ant_label = p_ant["data_posicao"] if p_ant else "—"
+st.markdown(f'<div class="section-title">Estrutura de cotas — comparação com {data_ant_label}</div>', unsafe_allow_html=True)
+
+# Cabeçalho da Tabela
+hdr_cols = st.columns([2,1,2.5,1.5,2.5,2])
+for col, txt in zip(hdr_cols, ["Classe","Spread (CDI +)","Valor Total","% Patrim.","Valor Cota","Qtd Cotas"]):
+    col.markdown(f'<span style="font-size:11px;color:#6c757d;text-transform:uppercase;letter-spacing:.04em">{txt}</span>', unsafe_allow_html=True)
+st.markdown("<hr style='margin:4px 0 8px;border-color:#dee2e6'>", unsafe_allow_html=True)
+
+# Desenha as linhas normais das cotas (Sênior, Mezaninos e Subordinada)
 for l in linhas_cotas:
     cols = st.columns([2,1,2.5,1.5,2.5,2])
     spr_txt = f"{l['spread']}%" if l['spread'] != "—" else "—"
     cols[0].markdown(f"**{l['tipo']}**")
     cols[1].markdown(spr_txt)
-    cols[2].markdown(cel_md(l["valor_total"],l["valor_total_ant"],fmt_brl), unsafe_allow_html=True)
-    cols[3].markdown(cel_md(l["pct_pl"],l["pct_pl_ant"],lambda v: f"{v:.2f}%"), unsafe_allow_html=True)
-    cols[4].markdown(cel_md(l["valor_cota"],l["valor_cota_ant"],fmt_brl), unsafe_allow_html=True)
+    cols[2].markdown(cel_md(l["valor_total"], l["valor_total_ant"], fmt_brl), unsafe_allow_html=True)
+    cols[3].markdown(cel_md(l["pct_pl"], l["pct_pl_ant"], lambda v: f"{v:.2f}%"), unsafe_allow_html=True)
+    cols[4].markdown(cel_md(l["valor_cota"], l["valor_cota_ant"], fmt_brl), unsafe_allow_html=True)
     cols[5].markdown(f"{l['qtde']:,.2f}")
     st.markdown("<hr style='margin:2px 0;border-color:#f0f0f0'>", unsafe_allow_html=True)
 
+# ── FECHAMENTO ──────────
+cols_f = st.columns([2,1,2.5,1.5,2.5,2])
+
+# Nome da linha em Negrito simples, combinando com o resto
+cols_f[0].markdown("**Média Pond. Superiores**")
+
+# 🔥 O CORRETO: As 4 casas decimais (:.4f) entram aqui no Spread Médio!
+cols_f[1].markdown(cel_md(spread_medio_ponderado, spread_medio_ponderado_ant, lambda v: f"{v:.4f}%"), unsafe_allow_html=True)
+
+# O Valor Total das cotas superiores também ganha o comparativo dinâmico
+cols_f[2].markdown(cel_md(total_sup, total_sup_ant, fmt_brl), unsafe_allow_html=True)
+
+# A soma dos pesos volta para 2 casas decimais (:.2f) para manter o padrão visual
+base_atual_pct = denominador_spread * 100
+base_anterior_pct = (denominador_spread_ant * 100) if denominador_spread_ant is not None else None
+cols_f[3].markdown(cel_md(base_atual_pct, base_anterior_pct, lambda v: f"{v:.2f}%"), unsafe_allow_html=True)
+
+# Colunas finais vazias seguindo o padrão
+cols_f[4].markdown('—')
+cols_f[5].markdown('—')
+
+st.markdown("<hr style='margin:4px 0 2px; border-top: 1px double #dee2e6; border-width:3px;'>", unsafe_allow_html=True)
+
+st.markdown("<hr style='margin:4px 0 2px; border-top: 1px double #dee2e6; border-width:3px;'>", unsafe_allow_html=True)
 # Direitos Creditórios
 st.markdown('<div class="section-title">Direitos creditórios</div>', unsafe_allow_html=True)
 col_dc1, col_dc2 = st.columns(2)
