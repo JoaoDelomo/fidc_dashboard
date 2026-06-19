@@ -46,4 +46,3 @@ fidc_dashboard/
 - Tabela de Swaps com resultado líquido
 - Obrigações a pagar e a receber
 
-
