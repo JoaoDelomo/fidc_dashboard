@@ -245,5 +245,5 @@ def save_snapshot(data: dict, storage_path: str = "data/historico.json"):
 def load_historico(storage_path: str = "data/historico.json") -> list:
     if not os.path.exists(storage_path):
         return []
-    with open(storage_path, "r") as f:
+    with open(storage_path, "r", encoding='utf-8') as f:
         return json.load(f)
