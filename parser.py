@@ -245,5 +245,18 @@ def save_snapshot(data: dict, storage_path: str = "data/historico.json"):
 def load_historico(storage_path: str = "data/historico.json") -> list:
     if not os.path.exists(storage_path):
         return []
-    with open(storage_path, "r", encoding='utf-8') as f:
-        return json.load(f)
+        
+    # 🛡️ Tentativa 1: Tenta ler em UTF-8 (padrão)
+    try:
+        with open(storage_path, "r", encoding='utf-8') as f:
+            return json.load(f)
+    except UnicodeDecodeError:
+        # 🛡️ Tentativa 2: Se falhar, o Windows salvou em formato antigo. Latin-1 resolve!
+        try:
+            with open(storage_path, "r", encoding='latin-1') as f:
+                return json.load(f)
+        except:
+            return []
+    except:
+        # Evita que o app caia caso o arquivo esteja corrompido ou vazio
+        return []
