@@ -1,0 +1,10 @@
+{
+  "usuarios": {
+    "helena": {
+      "nome": "Helena",
+      "email": "helena@ailapartners.com.br",
+      "senha_hash": "$2b$12$ZlbvYwno6fUzC/9YdC0V.O6KA60YS2qwvMehJTlEYbd1TIGdRcmMO",
+      "ativo": true
+    }
+  }
+}

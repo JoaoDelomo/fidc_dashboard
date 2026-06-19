@@ -7,6 +7,11 @@ import sys
 from datetime import datetime
 import time
 
+from login import tela_login
+
+if not tela_login():
+    st.stop()
+
 sys.path.insert(0, os.path.dirname(__file__))
 from parser import parse_lamina, save_snapshot, load_historico
 
@@ -46,22 +51,55 @@ def parse_data(s):
 with st.sidebar:
     st.title("📊 FIDC Dashboard")
     st.markdown("---")
-    uploaded = st.file_uploader("Upload da lâmina (.xlsx)", type=["xlsx"])
-    if uploaded:
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
-            tmp.write(uploaded.read()); tmp_path = tmp.name
-        try:
-            data = parse_lamina(tmp_path)
-            historico = save_snapshot(data, HISTORICO_PATH)
-            st.success(f"✅ Importado: {data['parametros']['data_posicao']}")
-        except Exception as e: st.error(f"Erro: {e}")
-        finally:
-            time.sleep(0.3)
-            try:
-                os.unlink(tmp_path)
-            except:
-                pass
+    usuario_logado = st.session_state.get("usuario", {})
+    st.caption(f"👤 {usuario_logado.get('nome','')}")
+
+    if st.button("Sair", use_container_width=True):
+        st.session_state.autenticado = False
+        st.session_state.usuario = None
+        st.rerun()
+
+    with st.expander("🔑 Trocar senha"):
+        from auth import alterar_senha
+        with st.form("form_trocar_senha"):
+            senha_atual = st.text_input("Senha atual", type="password")
+            nova_senha  = st.text_input("Nova senha", type="password")
+            confirma    = st.text_input("Confirmar", type="password")
+            salvar      = st.form_submit_button("Salvar", use_container_width=True)
+        if salvar:
+            if not senha_atual or not nova_senha or not confirma:
+                st.error("Preencha todos os campos.")
+            elif nova_senha != confirma:
+                st.error("As senhas não coincidem.")
+            elif len(nova_senha) < 6:
+                st.error("Mínimo 6 caracteres.")
+            else:
+                login_atual = usuario_logado.get("login","")
+                if alterar_senha(login_atual, senha_atual, nova_senha):
+                    st.success("Senha alterada!")
+                else:
+                    st.error("Senha atual incorreta.")
+
+    historico = load_historico(HISTORICO_PATH)
+    if not historico: st.info("Faça upload de uma lâmina para começar."); st.stop()
+    historico = sorted(historico, key=lambda h: parse_data(h["parametros"]["data_posicao"]))
+    datas_disponiveis = [h["parametros"]["data_posicao"] for h in historico]
+    data_selecionada = st.selectbox("Data de posição", datas_disponiveis[::-1], key="selectbox_data")
+    st.caption(f"{len(historico)} período(s) armazenado(s)")
+    st.markdown("---")
+    usuario_logado = st.session_state.get("usuario", {})
+    st.caption(f"👤 {usuario_logado.get('nome','')}")
+    col_logout, col_trocar = st.columns(2)
+    with col_logout:
+        if st.button("Sair", use_container_width=True, key="btn_sair"):
+            st.session_state.autenticado = False
+            st.session_state.usuario = None
+            st.rerun()
+    with col_trocar:
+        if st.button("Senha", use_container_width=True):
+            st.session_state.modo_login = "trocar"
+            st.session_state.autenticado = False
+            st.rerun()
 
     historico = load_historico(HISTORICO_PATH)
     if not historico: st.info("Faça upload de uma lâmina para começar."); st.stop()
